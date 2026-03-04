@@ -1,0 +1,99 @@
+import numpy as np
+
+CLASS_NAMES = ["impervi", "agricult", "forest", "wetlands", "soil", "water"]
+NUM_CLASSES = len(CLASS_NAMES)
+
+class StreamingChangeEvaluator:
+    """
+    Evaluate streaming change detection and classification. 
+    """
+    def __init__(self, num_classes, ignore_index=None):
+        self.num_classes = num_classes
+        self.ignore_index = ignore_index
+        
+        self._last_state = {}
+        
+        self.conf_matrix = np.zeros((num_classes, num_classes))
+        self.conf_matrix_change = np.zeros((2, 2))
+        self.conf_matrix_sc = np.zeros((num_classes, num_classes))
+
+    def update(self, patch_id, y_true, y_pred):        
+        y_true, y_pred = int(y_true), int(y_pred)
+        
+        if y_true == self.ignore_index:
+            return 
+
+        self.conf_matrix[y_true, y_pred] += 1
+        
+        if patch_id in self._last_state:
+            y_true_t_minus_1, y_pred_t_minus_1 = self._last_state[patch_id]
+
+            gt_change = 1 if y_true != y_true_t_minus_1 else 0
+            pred_change = 1 if y_pred != y_pred_t_minus_1 else 0
+
+            self.conf_matrix_change[gt_change, pred_change] += 1
+
+            if gt_change == 1:
+                self.conf_matrix_sc[y_true, y_pred] += 1
+
+        self._last_state[patch_id] = (y_true, y_pred)
+
+    def compute(self, prefix=""):
+        conf_mat = self.conf_matrix
+        conf_mat_change = self.conf_matrix_change
+        conf_mat_sc = self.conf_matrix_sc
+
+        # --- Classification Metrics ---
+        tp = np.diag(conf_mat)
+        support = conf_mat.sum(axis=1)
+        pred_counts = conf_mat.sum(axis=0)
+
+        fp = pred_counts - tp
+        fn = support - tp
+        
+        # IoU
+        iou_denom = tp + fp + fn
+        per_class_iou = tp / (iou_denom + 1e-8)
+
+        # mIoU
+        miou = np.nanmean(per_class_iou[support > 0]) * 100
+        if np.isnan(miou): 
+            miou = 0.0
+
+        # Precision, Recall, F1
+        precision = tp / (tp + fp + 1e-8)
+        recall = tp / (tp + fn + 1e-8)
+        f1 = 2 * precision * recall / (precision + recall + 1e-8)
+
+        # --- Change Metrics ---
+        bc_denom = conf_mat_change.sum() - conf_mat_change[0, 0]
+        bc = (conf_mat_change[1, 1] / (bc_denom + 1e-8)) * 100
+
+        tp_sc = np.diag(conf_mat_sc)
+        support_sc = conf_mat_sc.sum(axis=1)
+        fp_sc = conf_mat_sc.sum(axis=0) - tp_sc
+        fn_sc = support_sc - tp_sc
+
+        iou_sc_denom = tp_sc + fp_sc + fn_sc
+        iou_sc = tp_sc / (iou_sc_denom + 1e-8)
+        
+        valid = iou_sc[support_sc > 0]
+        sc = np.nanmean(valid) * 100 if len(valid) > 0 else 0.0
+
+        scs = 0.5 * (bc + sc)
+
+        output = {
+            f"{prefix}miou": miou,
+            f"{prefix}bc": bc,
+            f"{prefix}sc": sc,
+            f"{prefix}scs": scs,
+        }
+
+        # Per-class metrics
+        for i, class_name in enumerate(CLASS_NAMES):
+            output[f"{prefix}{class_name}"] = float(per_class_iou[i] * 100)
+            output[f"{prefix}{class_name}_precision"] = float(precision[i] * 100)
+            output[f"{prefix}{class_name}_recall"] = float(recall[i] * 100)
+            output[f"{prefix}{class_name}_f1"] = float(f1[i] * 100)
+
+        return output

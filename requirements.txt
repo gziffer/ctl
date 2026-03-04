@@ -1,0 +1,8 @@
+pandas
+matplotlib
+numpy
+hydra-core
+wandb
+pytorch-lightning
+capymoa
+timm

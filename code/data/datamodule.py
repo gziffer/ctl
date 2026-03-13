@@ -1,3 +1,8 @@
+"""
+Code from
+https://github.com/ElliotVincent/SitsSCD
+"""
+
 import pytorch_lightning as L
 from torch.utils.data import DataLoader
 import time
@@ -57,14 +62,12 @@ class ImageDataModule(L.LightningDataModule):
                 #self.val_dataset_in = self._builders["val_in"]()
                 print(f"Train dataset size: {len(self.train_dataset)}")
                 print(f"Out-of-domain val dataset size: {len(self.val_dataset_out)}")
-                #print(f"In-domain val dataset size: {len(self.val_dataset_in)}")
             elif self.domain_shift_type == "temporal":
                 print("Domain shift: temporal")
                 self.val_dataset_temporal = self._builders["val_temporal"]()
                 #self.val_dataset_in = self._builders["val_in"]()
                 print(f"Train dataset size: {len(self.train_dataset)}")
                 print(f"Temporal val dataset size: {len(self.val_dataset_temporal)}")
-                #print(f"In-domain val dataset size: {len(self.val_dataset_in)}")
             else:
                 print("No domain shift")
                 self.val_dataset_in = self._builders["val_in"]()
@@ -75,12 +78,10 @@ class ImageDataModule(L.LightningDataModule):
                 self.test_dataset_out = self._builders["test_out"]()
                 #self.test_dataset_in = self._builders["test_in"]()
                 print(f"Out-of-domain test dataset size: {len(self.test_dataset_out)}")
-                #print(f"In-domain test dataset size: {len(self.test_dataset_in)}")
             elif self.domain_shift_type == "temporal":
                 self.test_dataset_temporal = self._builders["test_temporal"]()
                 #self.test_dataset_in = self._builders["test_in"]()
                 print(f"Temporal test dataset size: {len(self.test_dataset_temporal)}")
-                #print(f"In-domain test dataset size: {len(self.test_dataset_in)}")
             else:
                 self.test_dataset_in = self._builders["test_in"]()
                 print(f"Test dataset size: {len(self.test_dataset_in)}")

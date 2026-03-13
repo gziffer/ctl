@@ -1,3 +1,8 @@
+"""
+Code from
+https://github.com/ElliotVincent/SitsSCD
+"""
+
 import numpy as np
 import torch
 import json

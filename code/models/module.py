@@ -1,3 +1,8 @@
+"""
+Code from
+https://github.com/ElliotVincent/SitsSCD
+"""
+
 import pytorch_lightning as L
 import torch
 import torch.nn as nn

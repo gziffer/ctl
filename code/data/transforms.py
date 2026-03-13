@@ -1,3 +1,8 @@
+"""
+Code from
+https://github.com/ElliotVincent/SitsSCD
+"""
+
 from random import randint
 import torch
 import torchvision.transforms as transforms

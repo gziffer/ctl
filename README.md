@@ -34,7 +34,16 @@ pip install -r requirements.txt
 ```
 
 ## Download Dataset
-Download the DynamicEarthNet dataset (images resized to 224x224) from the provided S3 bucket and unzip it:
+Download the DynamicEarthNet dataset (images resized to 224x224). You can download the dataset using the code below or by following this [link](https://drive.google.com/file/d/1MGJvAcNr0vTrcI2EDnP24vTB1A3NKTmx/view?usp=drive_link). 
+```bash
+cd ctl
+mkdir datasets
+cd datasets
+gdown 1MGJvAcNr0vTrcI2EDnP24vTB1A3NKTmx
+unzip DynamicEarthNet.zip -d DynamicEarthNet
+```
+
+Or fr:
 ```bash
 cd ctl
 mkdir datasets

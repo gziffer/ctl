@@ -43,15 +43,6 @@ gdown 1MGJvAcNr0vTrcI2EDnP24vTB1A3NKTmx
 unzip DynamicEarthNet.zip -d DynamicEarthNet
 ```
 
-Or fr:
-```bash
-cd ctl
-mkdir datasets
-cd datasets
-aws s3 cp s3://ctl-datasets/DynamicEarthNet.zip ./DynamicEarthNet.zip
-unzip DynamicEarthNet.zip -d DynamicEarthNet
-```
-
 ## Usage
 
 ### 1. Extract Embeddings
